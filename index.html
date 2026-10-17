@@ -1,0 +1,551 @@
+
+<!DOCTYPE html>
+<html lang="es" class="h-full scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>"(:"</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'jerusalem-gold': '#D4AF37',
+                        'jerusalem-light': '#F4E8C1',
+                        'jerusalem-stone': '#E8D8B8',
+                        'stone-dark': '#2A241E',
+                        'safed-blue': '#1D3557',
+                        'mystic-blue': '#4A90E2',
+                        'desert-sunset': '#E76F51',
+                        'mystic-purple': '#3D1E6D'
+                    },
+                    fontFamily: {
+                        serif: ['Georgia', 'serif'],
+                        sans: ['Inter', 'sans-serif']
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'float-slow': 'float 10s ease-in-out infinite',
+                        'pulse-glow': 'pulseGlow 3s ease-in-out infinite',
+                        'spin-slow': 'spin 20s linear infinite'
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': {
+                                transform: 'translateY(0px) rotate(0deg)'
+                            },
+                            '50%': {
+                                transform: 'translateY(-15px) rotate(1deg)'
+                            }
+                        },
+                        pulseGlow: {
+                            '0%, 100%': {
+                                opacity: '0.6',
+                                filter: 'drop-shadow(0 0 15px rgba(212,175,55,0.4))'
+                            },
+                            '50%': {
+                                opacity: '1',
+                                filter: 'drop-shadow(0 0 25px rgba(212,175,55,0.8))'
+                            }
+                        }
+                    }
+                }
+            }
+        };
+    </script>
+
+    <style>
+        body {
+            background-color: #120e0b;
+            color: #F4E8C1;
+            overflow-x: hidden;
+            cursor: default;
+        }
+
+        .noise-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background:
+                radial-gradient(
+                    circle at 50% 50%,
+                    rgba(29, 53, 87, 0.2),
+                    rgba(18, 14, 11, 0.85)
+                ),
+                url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 40;
+        }
+
+        .custom-cursor {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #D4AF37;
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            transition: transform 0.15s ease-out,
+                        background-color 0.2s ease;
+            transform: translate(-50%, -50%);
+            box-shadow:
+                0 0 10px rgba(212, 175, 55, 0.8),
+                inset 0 0 5px rgba(212, 175, 55, 0.5);
+        }
+
+        .cursor-trail {
+            width: 8px;
+            height: 8px;
+            background-color: #4A90E2;
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9998;
+            opacity: 0.7;
+            transition: transform 0.25s ease-out,
+                        opacity 0.3s ease;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 8px #4A90E2;
+        }
+
+        .mystic-border {
+            border: 2px solid #D4AF37;
+            position: relative;
+        }
+
+        .mystic-border::before,
+        .mystic-border::after {
+            content: "❖";
+            position: absolute;
+            color: #D4AF37;
+            font-size: 14px;
+            background: #120e0b;
+            padding: 0 4px;
+        }
+
+        .mystic-border::before {
+            top: -12px;
+            left: 10px;
+        }
+
+        .mystic-border::after {
+            bottom: -12px;
+            right: 10px;
+        }
+
+        #particleCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .geo-pattern {
+            background-image:
+                radial-gradient(#d4af37 0.75px, transparent 0.75px),
+                radial-gradient(#d4af37 0.75px, #120e0b 0.75px);
+            background-size: 30px 30px;
+            background-position: 0 0, 15px 15px;
+            opacity: 0.15;
+        }
+
+        .altar-card {
+            background: rgba(30, 24, 20, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            box-shadow:
+                0 10px 30px rgba(0, 0, 0, 0.5),
+                inset 0 0 15px rgba(212, 175, 55, 0.05);
+            transition: all 0.4s ease;
+        }
+
+        .altar-card:hover {
+            border-color: rgba(212, 175, 55, 0.8);
+            transform: translateY(-5px);
+            box-shadow:
+                0 15px 35px rgba(212, 175, 55, 0.2),
+                inset 0 0 20px rgba(212, 175, 55, 0.1);
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #120e0b;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #D4AF37;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #E8D8B8;
+        }
+
+        @media (hover: none), (pointer: coarse) {
+            .custom-cursor,
+            .cursor-trail {
+                display: none;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                scroll-behavior: auto !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+
+<body class="min-h-screen relative flex flex-col justify-between selection:bg-jerusalem-gold selection:text-black">
+
+    <div class="noise-overlay"></div>
+    <div class="fixed inset-0 geo-pattern pointer-events-none z-0"></div>
+    <canvas id="particleCanvas"></canvas>
+
+    <div class="custom-cursor" id="cursor"></div>
+    <div class="cursor-trail" id="cursorTrail"></div>
+    <audio id="bgAudio" src="imagenes/cancion.mp3" loop preload="auto"></audio>
+
+    <div id="enterOverlay"
+         class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-stone-dark text-jerusalem-light transition-opacity duration-1000 p-6 text-center">
+
+        <div class="mb-6 text-jerusalem-gold text-2xl tracking-widest animate-pulse">
+            ❤️ ❤️ ❤️
+        </div>
+
+        <h1 class="text-4xl md:text-6xl font-serif font-bold text-jerusalem-gold mb-4 tracking-wider uppercase drop-shadow-[0_0_15px_rgba(212,175,55,0.5)]">
+            con mucho cariño para Dash
+        </h1>
+
+        <p class="text-lg md:text-xl font-light text-jerusalem-stone max-w-md mb-2 italic">
+            "Un pequeño detalle para Dash"
+        </p>
+
+        <p class="text-xs text-mystic-blue tracking-widest uppercase mb-8">
+            Experiencia visual
+        </p>
+
+        <button id="startButton"
+                class="group relative px-8 py-4 bg-transparent border-2 border-jerusalem-gold text-jerusalem-gold font-serif text-lg tracking-widest uppercase rounded-sm overflow-hidden hover:text-stone-dark transition-colors duration-500 shadow-[0_0_20px_rgba(212,175,55,0.3)] hover:shadow-[0_0_35px_rgba(212,175,55,0.8)]">
+            <span class="absolute inset-0 w-full h-full bg-jerusalem-gold -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out -z-10"></span>
+            Entrar al Regalo
+        </button>
+
+    </div>
+
+    <button id="musicToggle"
+            type="button"
+            aria-label="Reproducir música"
+            aria-pressed="false"
+            class="fixed bottom-5 right-5 z-40 flex h-10 w-10 items-center justify-center rounded-full border border-jerusalem-gold/50 bg-stone-dark/85 text-jerusalem-gold shadow-lg backdrop-blur transition hover:border-jerusalem-gold hover:text-jerusalem-light focus:outline-none focus:ring-2 focus:ring-jerusalem-gold/60">
+        <svg class="h-4 w-4" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8 5v14l11-7z"></path></svg>
+    </button>
+
+    <main class="relative z-20 max-w-6xl mx-auto px-4 py-16 flex-grow flex flex-col items-center">
+
+        <header class="text-center my-12 animate-float">
+            <div class="inline-block px-4 py-1 border-b border-t border-jerusalem-gold/50 text-mystic-blue text-xs tracking-[0.3em] uppercase mb-4">
+            שלום - DIOS LA BENDIGA
+            </div>
+
+            <h1 class="text-5xl md:text-7xl font-serif text-transparent bg-clip-text bg-gradient-to-r from-jerusalem-gold via-jerusalem-light to-desert-sunset drop-shadow-lg font-bold mb-4">
+                LA TIERRA PROMETIDA
+            </h1>
+
+            <p class="text-jerusalem-stone/80 max-w-xl mx-auto font-light text-sm md:text-base leading-relaxed tracking-wide italic">
+        "Aun no es tarde para soñar, aun no es tarde para creer en la magia de la tierra prometida, donde cada amanecer es un poema y cada atardecer un suspiro de eternidad."
+            </p>
+        </header>
+
+        <section class="w-full my-10">
+            <div class="altar-card p-8 md:p-12 rounded-lg mystic-border max-w-4xl mx-auto relative overflow-hidden">
+                <div class="absolute -top-12 -right-12 w-32 h-32 bg-jerusalem-gold/10 rounded-full blur-2xl"></div>
+
+                <h2 class="text-2xl md:text-3xl font-serif text-jerusalem-gold mb-4 flex items-center gap-2">
+                    <i data-lucide="sparkles" class="w-6 h-6 text-mystic-blue"></i>
+                    <span>Para Dash</span>
+                </h2>
+
+                <div class="text-jerusalem-stone leading-relaxed space-y-4 text-sm md:text-base font-serif">
+                    <p class="first-letter:text-4xl first-letter:text-jerusalem-gold first-letter:font-bold first-letter:float-left first-letter:mr-3">
+                     ven, vamos a la tierra prometida,donde los sueños se entrelazan con la historia y la luz de Jerusalén ilumina cada rincón del alma. Aquí, en este santuario de espiritualidad y belleza, cada piedra cuenta un relato milenario, cada callejón susurra secretos de reyes y profetas, y cada amanecer pinta el cielo con tonos de oro y zafiro que despiertan la imaginación y el corazón.
+                    </p>
+
+                    <p>
+                       Bajo un cielo que parece fundido en oro y zafiro, Israel se erige como el epicentro eterno de la magia terrenal, una joya celestial esculpida por la historia donde Jerusalén brilla con el destello místico de mil soles y el aire vibra con el murmullo de reyes antiguos. Es un oasis de belleza indescriptible donde las colinas esmeralda de Galilea contemplan lagos de cristal, el mar Muerto ofrece un abrazo suspendido en una calma divina y las vibrantes playas de Tel Aviv susurran romances modernos al ritmo del Mediterráneo. En este rincón bendito, donde el perfume de la mirra y las especias enciende las pasiones del alma, la antigüedad más sagrada y la genialidad contemporánea se entrelazan en un suspiro eterno, consolidando a esta tierra como un santuario indomable de luz, arte y poesía inextinguible que enamora al mundo entero.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section class="w-full my-12">
+            <div class="text-center mb-10">
+                <h3 class="text-xl font-serif text-jerusalem-gold uppercase tracking-widest flex items-center justify-center gap-2">
+                    <span class="h-[1px] w-12 bg-jerusalem-gold/40"></span>
+                    israel en la pista
+                    <span class="h-[1px] w-12 bg-jerusalem-gold/40"></span>
+                </h3>
+
+                <p class="text-xs text-jerusalem-stone/60 mt-1">
+                     Visuales flotantes y nostalgia de piedra 
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 w-full">
+
+                <div class="altar-card p-4 rounded-lg flex flex-col items-center group">
+                    <div class="w-full h-64 bg-stone-dark/90 border border-jerusalem-gold/30 rounded relative overflow-hidden group-hover:border-jerusalem-gold transition-all duration-500">
+                        <img src="imagenes/1.jpg" alt="Jerusalén bajo la luz dorada" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                        <div class="absolute inset-0 bg-gradient-to-t from-safed-blue/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+                    </div>
+
+                    <div class="mt-4 text-center w-full">
+                        <h4 class="font-serif text-jerusalem-gold text-sm uppercase tracking-wider">Puerta del Amanecer</h4>
+                        <p class="text-xs text-jerusalem-stone/70 mt-1 font-serif italic">Luz dorada y piedra antigua en un sueño sin tiempo.</p>
+                    </div>
+                </div>
+
+                <div class="altar-card p-4 rounded-lg flex flex-col items-center group md:-translate-y-4">
+                    <div class="w-full h-64 bg-stone-dark/90 border border-jerusalem-gold/30 rounded relative overflow-hidden group-hover:border-jerusalem-gold transition-all duration-500">
+                        <img src="imagenes/2.jpg" alt="Paisaje mistico de Jerusalén" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                        <div class="absolute inset-0 bg-gradient-to-t from-desert-sunset/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+                    </div>
+
+                    <div class="mt-4 text-center w-full">
+                        <h4 class="font-serif text-jerusalem-gold text-sm uppercase tracking-wider">Murallas del Silencio</h4>
+                        <p class="text-xs text-jerusalem-stone/70 mt-1 font-serif italic">Historia, neblina y la quietud de una tierra sagrada.</p>
+                    </div>
+                </div>
+
+                <div class="altar-card p-4 rounded-lg flex flex-col items-center group">
+                    <div class="w-full h-64 bg-stone-dark/90 border border-jerusalem-gold/30 rounded relative overflow-hidden group-hover:border-jerusalem-gold transition-all duration-500">
+                        <img src="imagenes/3.jpg" alt="Atardecer entre colinas y luz mística" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                        <div class="absolute inset-0 bg-gradient-to-t from-mystic-purple/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+                    </div>
+
+                    <div class="mt-4 text-center w-full">
+                        <h4 class="font-serif text-jerusalem-gold text-sm uppercase tracking-wider">Luz del Desierto</h4>
+                        <p class="text-xs text-jerusalem-stone/70 mt-1 font-serif italic">Atardeceres eternos donde la memoria respira.</p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <section class="w-full my-12">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+                <div class="altar-card p-8 rounded-lg relative">
+                    <div class="flex items-center space-x-3 mb-4 border-b border-jerusalem-gold/20 pb-3">
+                        <span class="text-jerusalem-gold text-xl">🕯️</span>
+                        <h3 class="text-lg font-serif text-jerusalem-gold tracking-wider">
+                            historia de Israel
+                        </h3>
+                    </div>
+
+                    <div class="text-xs md:text-sm text-jerusalem-stone/90 leading-relaxed font-serif space-y-3">
+                        <p>
+                            Para entender la historia de Israel, es necesario sumergirse en sus raíces milenarias, donde cada piedra y cada callejón cuentan relatos de fe, resistencia y esperanza. Desde los tiempos bíblicos hasta la actualidad, la tierra prometida ha sido un crisol de culturas y religiones, un lugar donde la espiritualidad se entrelaza con la vida cotidiana.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="altar-card p-8 rounded-lg relative">
+                    <div class="flex items-center space-x-3 mb-4 border-b border-jerusalem-gold/20 pb-3">
+                        <span class="text-mystic-blue text-xl">🏛️</span>
+                        <h3 class="text-lg font-serif text-jerusalem-gold tracking-wider">
+                            UwU
+                        </h3>
+                    </div>
+
+                    <div class="text-xs md:text-sm text-jerusalem-stone/90 leading-relaxed font-serif space-y-3">
+                        <p>
+                            TODO EN JUEGO NADA EN SERIO WE
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <section class="w-full my-12 text-center">
+            <div class="altar-card p-8 rounded-lg border-2 border-dashed border-jerusalem-gold/40 max-w-2xl mx-auto">
+                <span class="text-2xl text-jerusalem-gold mb-2 block animate-pulse">✦ ✨ ✦</span>
+
+                <p class="font-serif text-jerusalem-light text-base md:text-lg italic mb-2">
+                    "El pueblo de israel sufre mucho, unete a la causa"
+                </p>
+
+                <span class="text-xs font-mono text-mystic-blue tracking-widest uppercase">
+                    — [AlexDev] 2026
+                </span>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="relative z-20 border-t border-jerusalem-gold/20 bg-stone-dark/90 py-8 text-center text-xs text-jerusalem-stone/60 font-serif">
+        <div class="max-w-6xl mx-auto px-4 flex flex-col items-center space-y-3">
+            <div class="flex items-center space-x-3 text-jerusalem-gold text-base">
+                <span>✡</span>
+                <span>✧</span>
+                <span>🕊️</span>
+                <span>✧</span>
+                <span>✡</span>
+            </div>
+
+            <p>Eלכבוד נתניהו</p>
+            <p class="text-[10px] font-mono text-stone-500">Miau © 2026</p>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+
+        // Cursor personalizado
+        const cursor = document.getElementById('cursor');
+        const cursorTrail = document.getElementById('cursorTrail');
+
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = `${e.clientX}px`;
+            cursor.style.top = `${e.clientY}px`;
+
+            setTimeout(() => {
+                cursorTrail.style.left = `${e.clientX}px`;
+                cursorTrail.style.top = `${e.clientY}px`;
+            }, 100);
+        });
+
+        // Partículas de fondo
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.5;
+                this.speedX = (Math.random() - 0.5) * 0.3;
+                this.speedY = -Math.random() * 0.5 - 0.1;
+                this.alpha = Math.random() * 0.7 + 0.1;
+                this.color = Math.random() > 0.3 ? '#D4AF37' : '#4A90E2';
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                if (
+                    this.y < 0 ||
+                    this.x < 0 ||
+                    this.x > canvas.width
+                ) {
+                    this.reset();
+                    this.y = canvas.height;
+                }
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.fillStyle = this.color;
+                ctx.shadowBlur = 8;
+                ctx.shadowColor = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        for (let i = 0; i < 60; i++) {
+            particles.push(new Particle());
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            particles.forEach((particle) => {
+                particle.update();
+                particle.draw();
+            });
+
+            requestAnimationFrame(animateParticles);
+        }
+
+        animateParticles();
+
+        const enterOverlay = document.getElementById('enterOverlay');
+        const startButton = document.getElementById('startButton');
+        const bgAudio = document.getElementById('bgAudio');
+        const musicToggle = document.getElementById('musicToggle');
+
+        function updateMusicButton() {
+            const isPlaying = !bgAudio.paused;
+            musicToggle.setAttribute('aria-label', isPlaying ? 'Pausar música' : 'Reproducir música');
+            musicToggle.setAttribute('aria-pressed', String(isPlaying));
+            musicToggle.innerHTML = isPlaying
+                ? '<svg class="h-4 w-4" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 4h4v16H6zM14 4h4v16h-4z"></path></svg>'
+                : '<svg class="h-4 w-4" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8 5v14l11-7z"></path></svg>';
+        }
+
+        async function playMusic() {
+            try {
+                await bgAudio.play();
+            } catch (error) {
+                console.error('No se pudo reproducir la música:', error);
+                updateMusicButton();
+            }
+        }
+
+        bgAudio.addEventListener('play', updateMusicButton);
+        bgAudio.addEventListener('pause', updateMusicButton);
+        musicToggle.addEventListener('click', () => {
+            if (bgAudio.paused) {
+                playMusic();
+            } else {
+                bgAudio.pause();
+            }
+        });
+
+        startButton.addEventListener('click', () => {
+            playMusic();
+            enterOverlay.style.opacity = '0';
+
+            window.setTimeout(() => {
+                enterOverlay.style.display = 'none';
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
